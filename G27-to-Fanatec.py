@@ -95,8 +95,18 @@ def read_reverse_button():
     return reverse_button
 
 def read_mode_switch():
-    """Read physical mode switch (pulled up)
-    Returns False for H-pattern (switch LOW), True for Sequential (switch HIGH)
+    """Return whether *sequential mode* is selected.
+
+    This function returns a logical mode selection for the rest of the program:
+
+    - False => H-pattern mode
+    - True  => Sequential mode
+
+    Wiring/electrical behavior (MODE_SWITCH_PIN is configured with Pin.PULL_UP):
+    - MODE_SWITCH_PIN reads LOW (0) when the switch connects the pin to GND.
+    - MODE_SWITCH_PIN reads HIGH (1) when the switch is open (pulled up).
+
+    In the current wiring/logic, pulling the pin LOW selects sequential mode.
     """
     return MODE_SWITCH_PIN.value() == 0
 
@@ -146,13 +156,13 @@ def gear_to_string(gear):
     }
     return gear_names.get(gear, "Unknown")
 
-def output_gear_to_fanatec(gear, mode):
+def output_gear_to_fanatec(gear, sequential_mode_selected):
     """
     Output gear to Fanatec wheelbase via RJ12
     
     RJ12 Pinout:
     Pin 1: GND
-    Pin 2: Mode (LOW=H-pattern, HIGH=sequential)
+    Pin 2: H-pattern/Sequential mode (LOW=H-pattern, HIGH=sequential)
     Pin 3: Shorted to Pin 2
     Pin 4: X axis (H-pattern) or shift down button (sequential)
     Pin 5: Y axis (H-pattern) or shift up button (sequential)
@@ -170,9 +180,9 @@ def output_gear_to_fanatec(gear, mode):
     """
     
     # Set mode pin based on mode switch
-    FANATEC_MODE_PIN.value(1 if mode else 0)
+    FANATEC_MODE_PIN.value(1 if sequential_mode_selected else 0)
     
-    if mode:
+    if sequential_mode_selected:
         # Sequential mode: output as shift buttons (active-low)
         if gear == 3:
             # Gear 3 position (forward/push) = Shift DOWN
@@ -220,13 +230,13 @@ def main():
         reverse_button = read_reverse_button()
         
         # Read mode switch
-        mode = read_mode_switch()
+        sequential_mode_selected = read_mode_switch()
         
         # Determine current gear
         gear = get_current_gear(x, y, reverse_button)
         
         # Output to Fanatec wheel interface
-        output_gear_to_fanatec(gear, mode)
+        output_gear_to_fanatec(gear, sequential_mode_selected)
         
         # Debug output
         if DEBUG:
@@ -236,7 +246,7 @@ def main():
             else:
                 x_dac, y_dac = FANATEC_GEAR_MAP[0]
             debugger.print_debug(
-                x, y, reverse_button, gear, mode, x_dac, y_dac,
+                x, y, reverse_button, gear, sequential_mode_selected, x_dac, y_dac,
                 SHIFTER_X_12, SHIFTER_X_56, SHIFTER_Y_NEUTRAL_MIN, SHIFTER_Y_NEUTRAL_MAX,
                 SHIFTER_Y_135_ZONE, SHIFTER_Y_246R_ZONE, gear_to_string
             )
