@@ -78,7 +78,7 @@ class ShifterDebugger:
         print(f"  Pin 4 (X):      {x_dac} (0-255)")
         print(f"  Pin 5 (Y):      {y_dac} ({y_state})")
     
-    def print_debug(self, x, y, reverse_button, gear, mode, x_dac, y_dac,
+    def print_debug(self, x, y, reverse_button, gear, sequential_mode_selected, x_dac, y_dac,
                    shifter_x_12, shifter_x_56, shifter_y_neutral_min, shifter_y_neutral_max,
                    shifter_y_135_zone, shifter_y_246r_zone, gear_to_string_func):
         """Print complete debug information"""
@@ -90,7 +90,7 @@ class ShifterDebugger:
                                 shifter_y_neutral_min, shifter_y_neutral_max,
                                 shifter_y_135_zone, shifter_y_246r_zone)
         
-        if mode:
+        if sequential_mode_selected:
             self.print_sequential_output(gear, gear_to_string_func)
         else:
             self.print_hpattern_output(gear, x_dac, y_dac, gear_to_string_func)
