@@ -228,14 +228,13 @@ def main():
         # Output to Fanatec wheel interface
         output_gear_to_fanatec(gear, mode)
         
-        # Get DAC values for debug output
-        if gear in FANATEC_GEAR_MAP:
-            x_dac, y_dac = FANATEC_GEAR_MAP[gear]
-        else:
-            x_dac, y_dac = FANATEC_GEAR_MAP[0]
-        
         # Debug output
         if DEBUG:
+            # Get DAC values for debug output
+            if gear in FANATEC_GEAR_MAP:
+                x_dac, y_dac = FANATEC_GEAR_MAP[gear]
+            else:
+                x_dac, y_dac = FANATEC_GEAR_MAP[0]
             debugger.print_debug(
                 x, y, reverse_button, gear, mode, x_dac, y_dac,
                 SHIFTER_X_12, SHIFTER_X_56, SHIFTER_Y_NEUTRAL_MIN, SHIFTER_Y_NEUTRAL_MAX,
